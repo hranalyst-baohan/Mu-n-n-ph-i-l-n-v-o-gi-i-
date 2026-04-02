@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎂 Mật Thư Sinh Nhật</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #e8516a;
+    --rose-light: #f7c5ce;
+    --blush: #fdf0f2;
+    --gold: #c9984a;
+    --gold-light: #f5e6cd;
+    --plum: #5c2d4a;
+    --ink: #2a1520;
+    --cream: #fdf8f5;
+    --found-bg: linear-gradient(135deg, #e8516a, #c9984a);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(232,81,106,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(201,152,74,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(92,45,74,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: var(--plum);
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+
+  header h1 em {
+    color: var(--rose);
+    font-style: italic;
+  }
+
+  header p {
+    color: #8a6070;
+    font-size: 0.92rem;
+    font-weight: 300;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── WORD LIST ── */
+  .word-list-section {
+    margin-bottom: 24px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .word-chip {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 5px 14px;
+    border-radius: 30px;
+    border: 1.5px solid var(--rose-light);
+    background: white;
+    color: var(--plum);
+    letter-spacing: 1px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .word-chip.found {
+    background: var(--found-bg);
+    border-color: transparent;
+    color: white;
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  /* ── GRID ── */
+  .grid-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.8) inset,
+      0 8px 40px rgba(92,45,74,0.1),
+      0 2px 8px rgba(92,45,74,0.06);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grid-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--found-bg);
+  }
+
+  #word-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 3px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(0.6rem, 2.5vw, 0.88rem);
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: crosshair;
+    background: var(--blush);
+    color: var(--ink);
+    transition: background 0.12s, color 0.12s, transform 0.1s;
+    border: 1px solid rgba(232,81,106,0.08);
+    letter-spacing: 0;
+  }
+
+  .cell:hover:not(.found) {
+    background: var(--rose-light);
+    transform: scale(1.05);
+  }
+
+  .cell.selecting {
+    background: #f9d0d8;
+    color: var(--rose);
+    transform: scale(1.06);
+    box-shadow: 0 0 0 2px var(--rose-light);
+    z-index: 2;
+    position: relative;
+  }
+
+  .cell.found {
+    background: var(--found-bg);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(232,81,106,0.3);
+  }
+
+  @keyframes cellFound {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .cell.found-anim {
+    animation: cellFound 0.35s ease;
+  }
+
+  @keyframes cellError {
+    0%, 100% { transform: translateX(0); background: var(--blush); }
+    20%, 60% { transform: translateX(-4px); background: #ffe4e8; }
+    40%, 80% { transform: translateX(4px); background: #ffe4e8; }
+  }
+
+  .cell.error {
+    animation: cellError 0.4s ease;
+  }
+
+  .grid-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #b08090;
+    margin-top: 12px;
+    font-weight: 300;
+  }
+
+  /* ── INVITATION ── */
+  .invitation-card {
+    background: white;
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow:
+      0 8px 40px rgba(92,45,74,0.1),
+      0 2px 8px rgba(92,45,74,0.06);
+    position: relative;
+  }
+
+  .invitation-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--found-bg);
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* Decorative corner */
+  .invitation-card::after {
+    content: '✦';
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-size: 1.2em;
+    color: var(--rose-light);
+  }
+
+  .invitation-header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--rose-light);
+  }
+
+  .invitation-header .icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .invitation-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--plum);
+    font-style: italic;
+  }
+
+  .invitation-body {
+    font-size: 0.98rem;
+    color: var(--ink);
+    line-height: 2.1;
+    font-weight: 300;
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 72px;
+    border-bottom: 2px solid var(--rose-light);
+    text-align: center;
+    padding: 0 6px 2px;
+    vertical-align: bottom;
+    font-style: italic;
+    color: #cbb0ba;
+    font-size: 0.88em;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-weight: 300;
+  }
+
+  .blank::before { content: attr(data-placeholder); }
+
+  .blank.filled {
+    border-bottom: 2px solid var(--rose);
+    color: var(--rose);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 0.95em;
+    background: linear-gradient(to bottom, transparent 70%, rgba(232,81,106,0.08) 100%);
+    border-radius: 2px;
+    padding: 0 8px 2px;
+    min-width: auto;
+  }
+
+  .blank.filled::before { content: attr(data-value); }
+
+  /* Progress */
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--blush);
+    border-radius: 10px;
+    margin: 20px 0 0;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--found-bg);
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── COMPLETION OVERLAY ── */
+  #completion {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
+    background: rgba(44,10,30,0.82);
+    backdrop-filter: blur(8px);
+  }
+
+  #completion.show { display: flex; }
+
+  .completion-card {
+    background: white;
+    border-radius: 24px;
+    padding: 48px 40px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .completion-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+
+  .completion-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--plum);
+    margin-bottom: 12px;
+  }
+
+  .completion-card p {
+    color: #8a6070;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+
+  .btn-close {
+    background: var(--found-bg);
+    border: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 20px rgba(232,81,106,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(232,81,106,0.5);
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    top: -20px;
+    animation: falling linear forwards;
+  }
+
+  @keyframes falling {
+    to {
+      transform: translateY(110vh) rotate(900deg);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="header-eyebrow">✦ Bạn nhận được một bí ẩn nhỏ ✦</div>
+    <h1>Mật Thư<br><em>Sinh Nhật</em></h1>
+    <p>Tìm các từ ẩn giấu trong ô chữ bên dưới để khám phá toàn bộ lời mời bí ẩn dành cho bạn 🎀</p>
+  </header>
+
+  <div class="word-list-section">
+    <div class="section-label">— Từ cần tìm —</div>
+    <div class="word-list" id="wordList"></div>
+  </div>
+
+  <div class="grid-card">
+    <div id="word-grid"></div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="grid-hint">💡 Kéo chuột hoặc chạm &amp; kéo để chọn từ theo hàng ngang, dọc hoặc chéo</div>
+  </div>
+
+  <div class="invitation-card">
+    <div class="invitation-header">
+      <div class="icon">💌</div>
+      <h2>Lời Mời Bí Ẩn</h2>
+    </div>
+    <div class="invitation-body" id="invitationBody"></div>
+  </div>
+
+</div>
+
+<!-- Completion overlay -->
+<div id="completion">
+  <div class="completion-card">
+    <div class="completion-emoji">🎉</div>
+    <h2>Chúc Mừng!</h2>
+    <p>Bạn đã giải mã xong rồi đó!<br>Hẹn gặp bạn tại bữa tiệc nhaaaa 🎂✨</p>
+    <button class="btn-close" onclick="document.getElementById('completion').classList.remove('show')">
+      Xem lại lời mời →
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   DATA
+══════════════════════════════════ */
+const GRID_DATA = [
+  ['R','N','M','K','P','L','B','Z','W','T','C','A','K','E','V'],
+  ['D','F','G','H','J','Q','S','X','Y','U','I','6','/','4','O'],
+  ['X','U','A','N','C','H','A','N','G','T','L','M','R','P','B'],
+  ['K','Z','W','V','D','F','G','J','Q','S','Y','I','O','L','N'],
+  ['M','R','P','B','K','Z','W','V','1','9','H','3','0','D','F'],
+  ['P','H','O','T','O','P','A','L','L','E','T','E','G','J','Q'],
+  ['S','Y','I','O','L','N','M','R','P','B','K','Z','W','V','D'],
+  ['Q','U','A','N','7','F','G','J','S','X','Y','I','O','L','N'],
+  ['M','R','P','B','K','C','H','I','I','K','Z','W','V','D','F'],
+  ['G','J','Q','S','X','Y','I','O','L','N','M','R','P','B','K'],
+  ['Z','W','V','A','R','I','E','S','D','F','G','J','Q','S','X'],
+  ['Y','I','O','L','N','M','R','P','B','K','Z','W','V','D','F'],
+  ['G','J','Q','S','X','Y','I','S','E','X','Y','Z','W','V','D'],
+  ['F','G','J','Q','S','X','Y','I','O','L','N','M','R','P','B'],
+  ['K','Z','W','V','D','F','G','J','Q','S','X','Y','I','O','L'],
+];
+
+// blankIndex: position in invitation blanks (0-8)
+const WORDS = [
+  { chars:['C','A','K','E'],                          blankIndex:5, display:'CAKE',          label:'CAKE' },
+  { chars:['6','/','4'],                              blankIndex:0, display:'6/4',           label:'6/4' },
+  { chars:['X','U','A','N','C','H','A','N','G'],      blankIndex:1, display:'Xuan Chang',    label:'XUANCHANG' },
+  { chars:['1','9','H','3','0'],                      blankIndex:2, display:'19h30',         label:'19H30' },
+  { chars:['P','H','O','T','O','P','A','L','L','E','T','E'], blankIndex:6, display:'Photo Pallete', label:'PHOTOPALLETE' },
+  { chars:['Q','U','A','N','7'],                      blankIndex:4, display:'7',             label:'QUAN7' },
+  { chars:['C','H','I','I','K'],                      blankIndex:3, display:'CHIIK',         label:'CHIIK' },
+  { chars:['A','R','I','E','S'],                      blankIndex:7, display:'ARIES',         label:'ARIES' },
+  { chars:['S','E','X','Y'],                          blankIndex:8, display:'SEXY',          label:'SEXY' },
+];
+WORDS.forEach(w => w.found = false);
+
+const INVITATION = [
+  { t:'text',  v:'Cốc cốc… có một lời mời nhỏ đang chờ bạn mở ra. Đến ngày\u00a0' },
+  { t:'blank', i:0 },
+  { t:'text',  v:',\u00a0tụi mình có một buổi hẹn để mừng sinh nhật của\u00a0' },
+  { t:'blank', i:1 },
+  { t:'text',  v:'.\u00a0Gặp nhau lúc\u00a0' },
+  { t:'blank', i:2 },
+  { t:'text',  v:'\u00a0tại\u00a0' },
+  { t:'blank', i:3 },
+  { t:'text',  v:',\u00a0Quận\u00a0' },
+  { t:'blank', i:4 },
+  { t:'text',  v:'.\u00a0Cùng ăn\u00a0' },
+  { t:'blank', i:5 },
+  { t:'text',  v:',\u00a0rồi sau đó mình ghé\u00a0' },
+  { t:'blank', i:6 },
+  { t:'text',  v:'\u00a0chụp vài tấm ảnh làm kỷ niệm nhoo 📸\u00a0Vì cũng đang vào mùa\u00a0' },
+  { t:'blank', i:7 },
+  { t:'text',  v:',\u00a0nên buổi tối đó chắc sẽ có chút gì đó đáng nhớ hơn bình thường á ✨\u00a0Dress code: cứ chọn gì đó\u00a0' },
+  { t:'blank', i:8 },
+  { t:'text',  v:'\u00a0một chút, đủ để bạn nổi bật theo cách của riêng mình là được.\u00a0Giải xong hết mấy cái này rồi thì biết đường mà đi nha. 🎁\u00a0Sự góp mặt của bạn là điều không thể thiếu đó.' },
+];
+
+/* ══════════════════════════════════
+   BUILD UI
+══════════════════════════════════ */
+const gridEl = document.getElementById('word-grid');
+const cells = [];  // [row][col]
+
+for (let r = 0; r < 15; r++) {
+  cells[r] = [];
+  for (let c = 0; c < 15; c++) {
+    const d = document.createElement('div');
+    d.className = 'cell';
+    d.textContent = GRID_DATA[r][c];
+    d.dataset.r = r;
+    d.dataset.c = c;
+    gridEl.appendChild(d);
+    cells[r][c] = d;
+  }
+}
+
+// Word chips
+const wordListEl = document.getElementById('wordList');
+WORDS.forEach((w, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'word-chip';
+  chip.id = `chip-${i}`;
+  chip.textContent = w.label;
+  wordListEl.appendChild(chip);
+});
+
+// Invitation
+const blanks = new Array(9).fill(null);
+function renderInvitation() {
+  const body = document.getElementById('invitationBody');
+  body.innerHTML = '';
+  INVITATION.forEach(part => {
+    if (part.t === 'text') {
+      body.appendChild(document.createTextNode(part.v));
+    } else {
+      const span = document.createElement('span');
+      span.className = 'blank';
+      span.id = `blank-${part.i}`;
+      if (blanks[part.i]) {
+        span.classList.add('filled');
+        span.dataset.value = blanks[part.i];
+      } else {
+        span.dataset.placeholder = '· · · · · ·';
+      }
+      body.appendChild(span);
+    }
+  });
+}
+renderInvitation();
+
+/* ══════════════════════════════════
+   SELECTION
+══════════════════════════════════ */
+let isSelecting = false;
+let selStart = null;
+let selEnd = null;
+let currentHighlight = new Set();
+
+function getLine(a, b) {
+  if (!a || !b) return [];
+  const dr = b.r - a.r, dc = b.c - a.c;
+  if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return [];
+  const steps = Math.max(Math.abs(dr), Math.abs(dc));
+  const sr = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+  const sc = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+  const line = [];
+  for (let i = 0; i <= steps; i++) line.push({ r: a.r + i * sr, c: a.c + i * sc });
+  return line;
+}
+
+function applyHighlight(line) {
+  // clear old
+  currentHighlight.forEach(k => {
+    const [r, c] = k.split(',').map(Number);
+    if (!cells[r][c].classList.contains('found')) cells[r][c].classList.remove('selecting');
+  });
+  currentHighlight.clear();
+  line.forEach(p => {
+    if (!cells[p.r][p.c].classList.contains('found')) cells[p.r][p.c].classList.add('selecting');
+    currentHighlight.add(`${p.r},${p.c}`);
+  });
+}
+
+function clearHighlight() {
+  currentHighlight.forEach(k => {
+    const [r, c] = k.split(',').map(Number);
+    if (!cells[r][c].classList.contains('found')) cells[r][c].classList.remove('selecting');
+  });
+  currentHighlight.clear();
+}
+
+function checkWord(line) {
+  if (line.length < 2) { clearHighlight(); return; }
+  const text = line.map(p => GRID_DATA[p.r][p.c]).join('');
+  const textRev = [...text].reverse().join('');
+
+  for (let i = 0; i < WORDS.length; i++) {
+    const w = WORDS[i];
+    if (w.found) continue;
+    const wt = w.chars.join('');
+    if (text === wt || textRev === wt) {
+      // FOUND!
+      w.found = true;
+      blanks[w.blankIndex] = w.display;
+
+      // Animate cells
+      line.forEach((p, idx) => {
+        const cell = cells[p.r][p.c];
+        cell.classList.remove('selecting');
+        setTimeout(() => {
+          cell.classList.add('found', 'found-anim');
+          setTimeout(() => cell.classList.remove('found-anim'), 400);
+        }, idx * 30);
+      });
+
+      // Update chip
+      document.getElementById(`chip-${i}`).classList.add('found');
+
+      // Update blank
+      const blankEl = document.getElementById(`blank-${w.blankIndex}`);
+      if (blankEl) {
+        blankEl.classList.add('filled');
+        delete blankEl.dataset.placeholder;
+        blankEl.dataset.value = w.display;
+      }
+
+      // Progress
+      const found = WORDS.filter(x => x.found).length;
+      document.getElementById('progressBar').style.width = (found / WORDS.length * 100) + '%';
+
+      currentHighlight.clear();
+
+      if (WORDS.every(x => x.found)) setTimeout(showCompletion, 700);
+      return;
+    }
+  }
+
+  // No match — error flash
+  line.forEach(p => {
+    const cell = cells[p.r][p.c];
+    cell.classList.remove('selecting');
+    cell.classList.add('error');
+    setTimeout(() => cell.classList.remove('error'), 450);
+  });
+  currentHighlight.clear();
+}
+
+function getCellAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  const cell = el && el.closest ? el.closest('.cell') : null;
+  if (!cell) return null;
+  return { r: parseInt(cell.dataset.r), c: parseInt(cell.dataset.c) };
+}
+
+// ── Mouse ──
+gridEl.addEventListener('mousedown', e => {
+  const pos = getCellAt(e.clientX, e.clientY);
+  if (!pos) return;
+  isSelecting = true; selStart = pos; selEnd = pos;
+  applyHighlight([pos]);
+  e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (!isSelecting) return;
+  const pos = getCellAt(e.clientX, e.clientY);
+  if (!pos) return;
+  selEnd = pos;
+  applyHighlight(getLine(selStart, selEnd));
+});
+document.addEventListener('mouseup', () => {
+  if (!isSelecting) return;
+  isSelecting = false;
+  const line = getLine(selStart, selEnd);
+  clearHighlight();
+  checkWord(line);
+  selStart = null; selEnd = null;
+});
+
+// ── Touch ──
+gridEl.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  const pos = getCellAt(t.clientX, t.clientY);
+  if (!pos) return;
+  isSelecting = true; selStart = pos; selEnd = pos;
+  applyHighlight([pos]);
+  e.preventDefault();
+}, { passive: false });
+
+gridEl.addEventListener('touchmove', e => {
+  if (!isSelecting) return;
+  const t = e.touches[0];
+  const pos = getCellAt(t.clientX, t.clientY);
+  if (!pos) return;
+  selEnd = pos;
+  applyHighlight(getLine(selStart, selEnd));
+  e.preventDefault();
+}, { passive: false });
+
+gridEl.addEventListener('touchend', e => {
+  if (!isSelecting) return;
+  isSelecting = false;
+  const line = getLine(selStart, selEnd);
+  clearHighlight();
+  checkWord(line);
+  selStart = null; selEnd = null;
+  e.preventDefault();
+}, { passive: false });
+
+/* ══════════════════════════════════
+   COMPLETION + CONFETTI
+══════════════════════════════════ */
+function showCompletion() {
+  document.getElementById('completion').classList.add('show');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ['#e8516a','#f7c5ce','#c9984a','#f5e6cd','#5c2d4a','#ce93d8','#90caf9'];
+  const shapes = ['circle', 'square', 'rect'];
+  for (let i = 0; i < 120; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = 6 + Math.random() * 10;
+      const dur = 1.8 + Math.random() * 2;
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      p.style.cssText = `
+        left:${Math.random()*100}vw;
+        width:${shape==='rect'?size*0.5:size}px;
+        height:${size}px;
+        background:${color};
+        border-radius:${shape==='circle'?'50%':shape==='rect'?'2px':'3px'};
+        animation-duration:${dur}s;
+        animation-delay:${Math.random()*0.3}s;
+        opacity:${0.7+Math.random()*0.3};
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), (dur + 0.5) * 1000);
+    }, i * 18);
+  }
+}
+</script>
+</body>
+</html>
