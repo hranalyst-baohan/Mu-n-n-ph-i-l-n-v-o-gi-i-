@@ -219,12 +219,13 @@
     animation: cellError 0.4s ease;
   }
 
-  .grid-hint {
+  .progress-text {
+    margin-top: 10px;
     text-align: center;
-    font-size: 0.78rem;
-    color: #b08090;
-    margin-top: 12px;
-    font-weight: 300;
+    font-size: 0.88rem;
+    color: #a15c71;
+    font-weight: 500;
+    letter-spacing: 0.2px;
   }
 
   /* ── INVITATION ── */
@@ -423,15 +424,10 @@
     <p>Tìm các từ ẩn giấu trong ô chữ bên dưới để khám phá toàn bộ lời mời bí ẩn dành cho bạn 🎀</p>
   </header>
 
-  <div class="word-list-section">
-    <div class="section-label">— Từ cần tìm —</div>
-    <div class="word-list" id="wordList"></div>
-  </div>
-
   <div class="grid-card">
     <div id="word-grid"></div>
     <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="grid-hint">💡 Kéo chuột hoặc chạm &amp; kéo để chọn từ theo hàng ngang, dọc hoặc chéo</div>
+    <div class="progress-text" id="progressText">Tiến độ hoàn thành: 0/9</div>
   </div>
 
   <div class="invitation-card">
@@ -533,16 +529,6 @@ for (let r = 0; r < 15; r++) {
   }
 }
 
-// Word chips
-const wordListEl = document.getElementById('wordList');
-WORDS.forEach((w, i) => {
-  const chip = document.createElement('div');
-  chip.className = 'word-chip';
-  chip.id = `chip-${i}`;
-  chip.textContent = w.label;
-  wordListEl.appendChild(chip);
-});
-
 // Invitation
 const blanks = new Array(9).fill(null);
 function renderInvitation() {
@@ -632,9 +618,6 @@ function checkWord(line) {
         }, idx * 30);
       });
 
-      // Update chip
-      document.getElementById(`chip-${i}`).classList.add('found');
-
       // Update blank
       const blankEl = document.getElementById(`blank-${w.blankIndex}`);
       if (blankEl) {
@@ -646,6 +629,7 @@ function checkWord(line) {
       // Progress
       const found = WORDS.filter(x => x.found).length;
       document.getElementById('progressBar').style.width = (found / WORDS.length * 100) + '%';
+      document.getElementById('progressText').textContent = `Tiến độ hoàn thành: ${found}/${WORDS.length}`;
 
       currentHighlight.clear();
 
